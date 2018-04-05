@@ -1,0 +1,26 @@
+{
+  "name": "t42-widget",
+  "version": "1.0.0",
+  "description": "T42 Widget",
+  "main": "Server.js",
+  "scripts": {
+    "watch": "node_modules\\.bin\\tsc",
+    "build": "node_modules\\.bin\\tsc && npm start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "repository": "https://github.com/peatidge/t42-reservation-widget.git",
+  "license": "ISC",
+  "devDependencies": {
+    "typesript":"2.8.1",
+    "@types/jquery": "^3.3.0",
+    "@types/moment": "^2.13.0",
+    "@types/moment-timezone": "^0.5.4",
+    "@types/node": "^9.4.5"
+  },
+  "dependencies": {
+   
+    "jquery": "^3.3.1",
+    "moment": "^2.20.1"
+  }
+}
