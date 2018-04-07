@@ -19,28 +19,20 @@ export class SittingCollectionView extends Backbone.View<any> {
  
     }
 
-    fetch(){
-        this.sittings.fetch(); 
-    }
-
-    initialize(){
-     
-    }
-
     render(): Backbone.View<any> {
         
       
-        let sittingDatesContainer = $('<div id="t42-control-sittings-container"></div>');
+        let el = $('<div id="t42-control-sittings-container-items"></div>');
       
         let restaurant = this.sittings.restaurant; 
         $.each(this.sittings.models,function(i,m){
     
             let sittingVM:SittingVM = <SittingVM>{ ... new SittingVM(), ...m };
             sittingVM.Restaurant = restaurant;
-            sittingDatesContainer.append(new SittingView(<SittingVM>{ ... new SittingVM(), ...m }).el); 
+            el.append(new SittingView(<SittingVM>{ ... new SittingVM(), ...m }).el); 
         })
         this.$el.html(' '); 
-        this.$el.append(sittingDatesContainer);
+        this.$el.append(el);
 
         return this; 
     }

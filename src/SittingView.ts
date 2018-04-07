@@ -29,9 +29,4 @@ export class SittingView extends Backbone.View<SittingVM> {
     
         return this; 
     }
-
-  
-
-
-
 }
