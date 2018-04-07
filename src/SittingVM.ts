@@ -2,8 +2,10 @@ import * as Backbone from 'backbone';
 
 export class SittingVM extends Backbone.Model{
 
+
     Id:number;
     RestaurantId :number;
+    Restaurant:any;
     StartTimeLocal: Date
     EndTimeLocal: Date
     StartTimeUtc: Date

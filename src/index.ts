@@ -4,13 +4,11 @@ import * as http from 'http';
 import * as moment from 'moment';
 import * as Backbone from 'backbone';
 import { AppView } from './appview';
-import { SittingVM } from './sittingvm';
-import { SittingVW } from './sittingvw';
-import { SittingCollectionVM } from './sittingcollectionvm';
 
 
-
-$(()=>{ var view = new AppView(); });
+$(()=>{   
+    var view = new AppView();  
+});
 
 
 
