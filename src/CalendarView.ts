@@ -31,6 +31,10 @@ export class CalendarView extends Backbone.View<any> {
         }
     }
 
+    initialize(){
+        this.setElement($("#t42-control-calendar"));
+    }
+
     calendarChanged(e:any){
         this.month = <number>$("#t42-control-month-select").val(); 
         this.year = <number>$("#t42-control-year-select").val(); 

@@ -3,6 +3,7 @@ import * as _ from 'underscore';
 import * as Backbone from 'backbone';
 import * as moment from 'moment';
 import * as momentTimzone from 'moment-timezone';
+import { PaxView } from './PaxView';
 import { CalendarView } from './CalendarView';
 import { SittingVM } from './SittingVM';
 import { SittingView } from './SittingView';
@@ -11,40 +12,55 @@ import { SittingCollectionView } from './SittingCollectionView';
 
 export class AppView extends Backbone.View<any> {
 
-    hash:string; 
-    uuid:string;
-    restaurant:any;
-    month:number; 
-    year:number;
-    sittings:SittingCollectionVM;
+    hash:string; uuid:string;
+    month:number; year:number; pax:number;
+    restaurant:any; sittings:SittingCollectionVM;
 
-    constructor(options?:any) {
-        super(options);
+    constructor(options?:any) { super(options); this.bootstrap() }
 
-        this.hash = $('#t42-control').data('hash').split('-')[1]; 
-        this.uuid = $('#t42-control').data('uuid').split('-')[1]; 
-        
+    render(){
+        this.renderCalendar(); 
+        this.renderPax(); 
+        this.renderSittings(); 
+        return this;
+    }
+
+    initialize(){ this.setElement($("#t42-control")); }
+
+    bootstrap(){
+        this.$el.css({
+            'max-width':'300px',
+            'z-index':'10000',
+            'position': 'absolute',
+            'top':'0',
+            'bottom': '0',
+            'left': '0',
+            'right': '0',
+            'margin': 'auto',
+            'height': '500px',
+        });
+
         let container:JQuery<HTMLElement> = 
         $(
             `<div id="t42-control-container">
-                <div id="t42-control-calendar"></div>
-                <div id="t42-control-pax"></div>
+                <div id="t42-control-header" style="padding:5px;background-color:#000;">
+                    <span id="t42-control-calendar"></span>
+                    <span id="t42-control-pax"></span>
+                </div>
                 <div id="t42-control-sittings"></div>
             </div>`
         );
 
-        $('#t42-control').append(container);
-        
-        this.$el = container; 
-        var me = this; 
-        
+        this.$el.append(container);
+        this.hash = this.$el.data('hash').split('-')[1]; 
+        this.uuid = this.$el.data('uuid').split('-')[1]; 
+        var me = this;      
         $.ajax({
             url: 'http://localhost:20915/api/v1/services/reservations/restaurant?hash='+ this.hash + '&id='+ this.uuid,
             type:'GET',
             dataType: "jsonp",
            contentType: "application/json",
-           success:function(r){  
-                
+           success:function(r){               
                 me.restaurant = r;                  
                 me.year = me.now().year();
                 me.month = me.now().month();
@@ -52,41 +68,28 @@ export class AppView extends Backbone.View<any> {
             },
            error:function(e){ debugger; },
         })
-       
-      
-    }
-
-    render(){
-        this.renderCalendar(); 
-        this.renderSittings();
-        return this;
     }
 
     now = () :moment.Moment => { return momentTimzone.tz(new Date(),this.restaurant.TimeZoneIANA); }
 
-    renderSittings(){
-        this.sittings = new SittingCollectionVM(this.hash,this.uuid,this.month,this.year,this.restaurant);  
-        let sittingsView =  new SittingCollectionView(this.sittings);  
-        this.$el.find("#t42-control-sittings").append(sittingsView.$el);
-
-    }
-
     renderCalendar(){
         let until = this.now(); 
         until.add(this.restaurant.DaysAheadAllowed,'days');
-        debugger;
-        let calendar = new CalendarView(this.year,until.year(),this.month);  
-        calendar.on("calendarChanged",(e:any)=>{
-            let wtf = e; 
-            this.year = e.year;
-            this.month = e.month;
-            this.sittings.year = this.year;
-            this.sittings.month = this.month;
-            this.sittings.fetch(); 
+        let calendarView = new CalendarView(this.year,until.year(),this.month);  
+        calendarView.on("calendarChanged",(e:any)=>{
+            this.year = e.year; this.month = e.month;
+            this.sittings.setMonthYearAndFetch(e.month,e.year);
         }); 
-        this.$el.find("#t42-control-calendar").append(calendar.$el);
-
     }
 
+    renderPax(){  
+        var paxView = new PaxView(this.restaurant.MaxGuests);
+        paxView.on("paxChanged",(e:any)=>{ this.pax = e.pax; }); 
+    }
 
+    renderSittings(){
+        this.sittings = new SittingCollectionVM(this.hash,this.uuid,this.month,this.year,this.restaurant);  
+        let sittingsView =  new SittingCollectionView(this.sittings);  
+        //this.$el.find("#t42-control-sittings").append(sittingsView.$el);
+    }
 }

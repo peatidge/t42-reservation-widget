@@ -21,10 +21,16 @@ export class SittingCollectionVM extends Backbone.Collection<SittingVM> {
         this.url = function(){ return 'http://localhost:20915/api/v1/services/reservations/dates?hash='+ hash +'&id=' + uuid + '&year='+  this.year + '&month=' + this.month; }; 
         this.parse =  function(data:any) { return data.Sittings; }       
         this.sync = function(method:any, model:any, options:any) {
+            this.trigger('request');
             var params = _.extend({type:'GET',dataType:'jsonp',contentType: "application/json", url:model.url() }, options);
             return $.ajax(params);
         };
 
+    }
+
+    setMonthYearAndFetch(month:number,year:number){
+        this.month = month; this.year = year; 
+        this.fetch(); 
     }
 
 

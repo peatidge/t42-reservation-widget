@@ -14,29 +14,30 @@ export class SittingCollectionView extends Backbone.View<any> {
     constructor(sittings: SittingCollectionVM){     
         super(); 
         this.sittings = sittings; 
+        this.$el = $("#t42-control-sittings");
         this.sittings.on('sync',(e:any)=> { this.render.apply(this); });
+        this.sittings.on('request',(e:any)=> { this.$el.html(' ');this.$el.html('<div style="text-align:center;padding:2.5px;"><i>fetching...</i></div>'); });
         this.sittings.fetch(); 
- 
     }
 
     render(): Backbone.View<any> {
         
-      
         let el = $('<div id="t42-control-sittings-container-items"></div>');
-      
-        let restaurant = this.sittings.restaurant; 
-        $.each(this.sittings.models,function(i,m){
-    
-            let sittingVM:SittingVM = <SittingVM>{ ... new SittingVM(), ...m };
-            sittingVM.Restaurant = restaurant;
-            el.append(new SittingView(<SittingVM>{ ... new SittingVM(), ...m }).el); 
-        })
-        this.$el.html(' '); 
-        this.$el.append(el);
 
+        if(this.sittings.models.length > 0){
+
+            $.each(this.sittings.models,(i,m)=> {
+                let sittingVM:SittingVM = <SittingVM>{ ... new SittingVM(), ...m };
+                sittingVM.Restaurant = this.sittings.restaurant; 
+                el.append(new SittingView(<SittingVM>{ ... new SittingVM(), ...m }).el); 
+            })
+        }
+        else{
+            el = $('<div style="text-align:center;padding:2.5px;"><i>there are no times available for the selected month</i></div>')
+        }
+        
+        this.$el.html(' '); this.$el.append(el);
         return this; 
     }
-
-  
 
 }
