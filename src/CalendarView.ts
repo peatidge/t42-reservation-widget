@@ -1,5 +1,6 @@
 import * as $ from 'jquery';
 import * as Backbone from 'backbone';
+import { AppVM } from './AppVM'; 
 import { SittingVM } from './SittingVM'; 
 import * as _ from 'underscore';
 import * as moment from 'moment';
@@ -8,18 +9,17 @@ import { DEFAULT_ECDH_CURVE } from 'tls';
 
 export class CalendarView extends Backbone.View<any> {
 
-    model:any;
-    month:number;
+    appVM:AppVM;
     months:string[] = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-    year:number; 
     years:number[] = []; 
 
-    constructor(startYear:number,endYear:number,month:number){    
-
+    constructor(appVM:AppVM){    
         super(); 
-        this.year = startYear;
-        this.month = month; 
-        while(startYear <= endYear){ this.years.push(startYear++); }
+        this.appVM = appVM;
+        let begin = appVM.now().year();
+        let until = appVM.now(); 
+        until.add(appVM.get('restaurant').DaysAheadAllowed,'days');
+        while(begin <= until.year()){ this.years.push(begin++); }
         this.render();    
     }
 
@@ -36,20 +36,24 @@ export class CalendarView extends Backbone.View<any> {
     }
 
     calendarChanged(e:any){
-        this.month = <number>$("#t42-control-month-select").val(); 
-        this.year = <number>$("#t42-control-year-select").val(); 
-        this.trigger("calendarChanged",{month:this.month,year:this.year});
+        this.appVM.set('month',<number>$("#t42-control-month-select").val()); 
+        this.appVM.set('year', <number>$("#t42-control-year-select").val()); 
+        this.appVM.get('sittings').fetch();  
+        this.appVM.set('view','sittings');  
+        //this.trigger("calendarChanged",{month:this.appVM.month,year:this.appVM.year});
     }
 
     render(): Backbone.View<any> {
         
-        var monthSelect = $('<select id="t42-control-month-select"></select>');
+        var monthSelect = $('<select id="t42-control-month-select" style="cursor:pointer" title="click to select month" ></select>');
         $.each(this.months,(i,m)=>{monthSelect.append('<option value="' + i + '">' + m + '</option>'); });
-        monthSelect.val(this.month);
+        monthSelect.val(this.appVM.get('month'));
+        monthSelect.css({"background-color":  this.appVM.get('css-bg-color'),"color": this.appVM.get('css-color'),'border':'none'});
 
-        var yearSelect = $('<select id="t42-control-year-select"></select>');
+        var yearSelect = $('<select id="t42-control-year-select" style="cursor:pointer" title="click to select year" ></select>');
         $.each(this.years,(i,y)=>{ yearSelect.append('<option value="' + y + '">' + y + '</option>'); });
-        yearSelect.val(this.year);
+        yearSelect.val(this.appVM.get('year'));
+        yearSelect.css({"background-color":  this.appVM.get('css-bg-color'),"color": this.appVM.get('css-color'),'border':'none'});
 
         this.$el.html('');
         this.$el.append(monthSelect); 

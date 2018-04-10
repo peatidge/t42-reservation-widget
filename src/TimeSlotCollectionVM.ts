@@ -1,20 +1,18 @@
 import * as $ from 'jquery';
 import * as Backbone from 'backbone';
-import { AppVM } from './AppVM';
-import { SittingVM } from './SittingVM'; 
+import { AppVM } from './AppVM'; 
 import * as _ from 'underscore';
 
-export class SittingCollectionVM extends Backbone.Collection<SittingVM> {
+export class TimeSlotCollectionVM extends Backbone.Collection<any> {
+
 
     appVM:AppVM;
 
     constructor(appVM:AppVM){
         super(); 
         this.appVM = appVM;
-        this.url = () => { 
-            return 'http://localhost:20915/api/v1/services/reservations/sittings?hash='
-                + this.appVM.get('hash') +'&id=' + this.appVM.get('uuid') + '&year='+  this.appVM.get('year') + '&month=' + this.appVM.get('month'); 
-        }; 
+    
+        this.url = function(){ return 'http://localhost:20915/api/v1/services/reservations/sitting?hash='+  this.appVM.get('hash') +'&id=' +  this.appVM.get('uuid')  + '&year='+  this.year + '&month=' + this.month; }; 
         this.parse =  function(data:any) { return data.Sittings; }       
         this.sync = function(method:any, model:any, options:any) {
             this.trigger('request');
