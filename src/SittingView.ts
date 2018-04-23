@@ -4,7 +4,7 @@ import { AppVM } from './AppVM';
 import { SittingVM } from './SittingVM'; 
 import * as _ from 'underscore';
 import * as moment from 'moment';
-import * as momentTimzone from 'moment-timezone';
+import * as momentTimezone from 'moment-timezone';
 
 export class SittingView extends Backbone.View<SittingVM> {
 
@@ -26,10 +26,10 @@ export class SittingView extends Backbone.View<SittingVM> {
     render(): Backbone.View<SittingVM> {
         
         let appVM:AppVM = (<any>this.model.collection).appVM;
-
-        var date = momentTimzone.tz(this.model.attributes.StartTimeUtc,appVM.get('restaurant').TimeZoneIANA);      
-        var model = {Id:this.model.attributes.Id, Name:this.model.attributes.Name,Start: date.format("ddd Do MMM @ h:mm a") };
+        var start = momentTimezone.tz(this.model.attributes.StartTimeUTC,appVM.get('restaurant').TimeZoneIANA);      
+        var model = {Id:this.model.attributes.Id, Name:this.model.attributes.Name,Start: start.format("ddd Do MMM @ h:mm a"),Epoques:this.model.attributes.Epoques };
         var button = $(this.template(model));
+ 
         button.css({"background-color": appVM.get('css-bg-color'),"color":appVM.get('css-color')})
         this.$el.html(''); 
         this.$el.append(button); 

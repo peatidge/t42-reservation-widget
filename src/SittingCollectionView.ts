@@ -2,7 +2,7 @@ import * as $ from 'jquery';
 import * as _ from 'underscore';
 import * as Backbone from 'backbone';
 import * as moment from 'moment';
-import * as momentTimzone from 'moment-timezone';
+import * as momentTimezone from 'moment-timezone';
 import { AppVM } from './AppVM'; 
 import { SittingVM } from './SittingVM'; 
 import { SittingView } from './SittingView'; 
@@ -58,6 +58,7 @@ export class SittingCollectionView extends Backbone.View<any> {
         
         let el:JQuery<HTMLElement> = $('<div id="t42-control-sittings-container-items"></div>');
 
+        //if a sitting has been selected i.e. the app view model has a valid sitting object
         if(this.appVM.get('sitting')){
 
             var s= this.appVM.get('sitting');
@@ -68,7 +69,7 @@ export class SittingCollectionView extends Backbone.View<any> {
                         </div>`
                     );
 
-            var date = momentTimzone.tz( s.get('StartTimeUtc'),this.appVM.get('restaurant').TimeZoneIANA); 
+            var date = momentTimezone.tz( s.get('StartTimeUTC'),this.appVM.get('restaurant').TimeZoneIANA); 
             let start =  date.format("ddd Do MMM @ h:mm a") ;    
             var model = {Id:s.get('Id'), Name:s.get('Name'),Start:start};  
 
@@ -83,6 +84,7 @@ export class SittingCollectionView extends Backbone.View<any> {
             el.append(sittingBtn);
         }
 
+        // check which view is selected and render it i.e. sitting view, timeslot view ...
         if(this.appVM.get('view') === 'sittings'){
             
             let scroll = $('<div style="overflow-y: scroll; height:500px;">')
@@ -104,6 +106,32 @@ export class SittingCollectionView extends Backbone.View<any> {
                 scroll.append(msg);
             }
             el.append(scroll);
+        }
+        else if(this.appVM.get('view') === 'timeslots'){
+
+            var epoques = this.appVM.get('sitting').attributes.Epoques; 
+            
+            let scroll = $('<div style="overflow-y: scroll; height:500px;">')
+            debugger;
+            if(epoques.length > 0){
+
+                $.each(epoques,(i,e)=> {
+                    var time = momentTimezone.tz( e.Time,this.appVM.get('restaurant').TimeZoneIANA); 
+                    scroll.append('<div>'+ time.format("h:mm a") + ' ' + e.Pax + '</div>'); 
+                })
+            }
+            else{
+                let msg = $('<div><i>there are no times available for the selected sitting</i></div>');
+                msg.css({ 'text-align':'center',
+                            'padding':'2.5px',
+                            'background-color':this.appVM.get('css-bg-color'), 
+                            'color': this.appVM.get('css-color') 
+                        });
+                scroll.append(msg);
+            }
+            el.append(scroll);
+
+
         }
       
       
