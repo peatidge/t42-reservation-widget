@@ -13,8 +13,6 @@ import { SittingCollectionView } from './SittingCollectionView';
 
 export class AppView extends Backbone.View<AppVM> {
 
-    
-
     constructor(options?:any) { super(options); this.bootstrap() }
 
     render(){
@@ -29,12 +27,7 @@ export class AppView extends Backbone.View<AppVM> {
     bootstrap(){
 
         this.model  = new AppVM();
-        _.extend(this.model, Backbone.Events);
-        //this.model.on( { "change:sitting":()=> { debugger; } } );
-        // triggered when a sitting is selected (or the sitting is removed)
-       // this.model.on( { "change:sitting":()=> { } } );
-
-     
+        _.extend(this.model,Backbone.Events);
 
         this.model.on( { "all":()=> {  
             console.log('Month:' + this.model.get('month'),' Year:',this.model.get('year') + ' Pax:' + this.model.get('pax') + ' Sittings:' + this.model.get('sittings'));
@@ -56,12 +49,10 @@ export class AppView extends Backbone.View<AppVM> {
                     <span id="t42-control-pax"></span>
                 </div>
                 <div id="t42-control-sittings"></div>
-                <div id="t42-control-footer" style="padding:25px;margin-top:5px;text-align:center;"></div>
             </div>`
         );
 
         container.find("#t42-control-header").css({"background-color": this.model.get('css-bg-color'),"color":this.model.get('css-color')}); 
-        container.find("#t42-control-footer").css({"background-color": this.model.get('css-bg-color'),"color":this.model.get('css-color')}); 
         
         this.$el.append(container);
         
@@ -72,20 +63,19 @@ export class AppView extends Backbone.View<AppVM> {
             dataType: "jsonp",
            contentType: "application/json",
            success:function(r){                 
-                me.model.set('restaurant',r);               
-                me.model.set('year', me.now().year());
-                me.model.set('month', me.now().month());
+                me.model.set('restaurant',r); 
+                var now:moment.Moment = momentTimzone.tz(new Date(),r.TimeZoneIANA);  
+                me.model.set('now',now);               
+                me.model.set('year', now.year());
+                me.model.set('month', now.month());
                 me.render.apply(me); 
             },
            error:function(e){ debugger; },
         })
     }
 
-    now = () :moment.Moment => { return momentTimzone.tz(new Date(),this.model.get('restaurant').TimeZoneIANA); }
-
     renderCalendar(){
         let calendarView = new CalendarView(this.model);  
-        //calendarView.on("calendarChanged",(e:any)=>{ this.model.sittings.setMonthYearAndFetch(e.month,e.year); }); 
     }
 
     renderPax(){  
@@ -95,6 +85,5 @@ export class AppView extends Backbone.View<AppVM> {
     renderSittings(){
         this.model.set('sittings',new SittingCollectionVM(this.model));  
         let sittingsView =  new SittingCollectionView(this.model);  
-        //this.$el.find("#t42-control-sittings").append(sittingsView.$el);
     }
 }

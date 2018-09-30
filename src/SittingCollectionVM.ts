@@ -15,7 +15,11 @@ export class SittingCollectionVM extends Backbone.Collection<SittingVM> {
             return 'http://localhost:20915/api/v1/services/reservations/sittings?hash='
                 + this.appVM.get('hash') +'&id=' + this.appVM.get('uuid') + '&year='+  this.appVM.get('year') + '&month=' + this.appVM.get('month'); 
         }; 
-        this.parse =  function(data:any) { return data.Sittings; }       
+        
+        this.parse =  function(data:any) { 
+            return data.Sittings; 
+        }      
+
         this.sync = function(method:any, model:any, options:any) {
             this.trigger('request');
             var params = _.extend({type:'GET',dataType:'jsonp',contentType: "application/json", url:model.url() }, options);

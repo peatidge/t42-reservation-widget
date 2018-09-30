@@ -14,10 +14,8 @@ export class CalendarView extends Backbone.View<any> {
     years:number[] = []; 
 
     constructor(appVM:AppVM){    
-        super(); 
-        this.appVM = appVM;
-        let begin = appVM.now().year();
-        let until = appVM.now(); 
+        super(); this.appVM = appVM;
+        let begin = appVM.get('now').year(); let until = appVM.get('now'); 
         until.add(appVM.get('restaurant').DaysAheadAllowed,'days');
         while(begin <= until.year()){ this.years.push(begin++); }
         this.render();    
@@ -40,7 +38,6 @@ export class CalendarView extends Backbone.View<any> {
         this.appVM.set('year', <number>$("#t42-control-year-select").val()); 
         this.appVM.get('sittings').fetch();  
         this.appVM.set('view','sittings');  
-        //this.trigger("calendarChanged",{month:this.appVM.month,year:this.appVM.year});
     }
 
     render(): Backbone.View<any> {

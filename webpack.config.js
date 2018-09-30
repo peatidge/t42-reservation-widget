@@ -4,7 +4,8 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
   mode: 'development',
-  entry: './src/index.ts',
+  context:path.resolve(__dirname,'src'),
+  entry: './index.ts',
   devtool: 'inline-source-map',
   devServer: {
         contentBase: './dist'
@@ -23,7 +24,7 @@ module.exports = {
   },
   plugins: [
     new CleanWebpackPlugin(['dist']),
-    new HtmlWebpackPlugin({ title: 'Development', template:'src/index.html' })
+    new HtmlWebpackPlugin({ title: 'Development', template:'index.html' })
   ],
   output: {
     filename: 'bundle.js',

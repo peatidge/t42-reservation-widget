@@ -13,9 +13,6 @@ import { SittingCollectionView } from './SittingCollectionView';
 
 export class AppVM  extends Backbone.Model{
 
-
-    now = () :moment.Moment => { return momentTimzone.tz(new Date(),this.get('restaurant').TimeZoneIANA); }
-
 }
 
 
