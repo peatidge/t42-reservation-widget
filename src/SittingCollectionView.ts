@@ -32,7 +32,6 @@ export class SittingCollectionView extends Backbone.View<any> {
     }
 
     initialize(){
-        // bind this view object to the #t42-control-sittings element
         this.setElement($("#t42-control-sittings"));
     }
 
@@ -44,6 +43,7 @@ export class SittingCollectionView extends Backbone.View<any> {
         switch(this.appVM.get('view')){
             case 'sittings': this.renderSittingsView(el); break; 
             case 'timeslots': this.renderTimeslotsView(el); break; 
+            case 'information': this.renderInformationView(el); break; 
             default: throw new Error();
 
         }
@@ -71,33 +71,14 @@ export class SittingCollectionView extends Backbone.View<any> {
 
     renderTimeslotsView(el:JQuery<HTMLElement>){
         
-        // display the selected sitting above the timeslots
-        var s = this.appVM.get('sitting');
-        var sittingTemplate = 
-        _.template(`<div class="timeslot-sitting" id="sitting-id-<%=Id%>" style="text-align:center;padding:5px;border:1px solid #000;margin-bottom:2.5px;">
-                        <div><%= Name %></div>
-                        <div><%= Start %></div>                                
-                    </div>`);
-
-        var date = momentTimezone.tz(s.get('StartTimeUTC'),this.appVM.get('restaurant').TimeZoneIANA); 
-        let start =  date.format("ddd Do MMM @ h:mm a") ;    
-        var model = {Id:s.get('Id'), Name:s.get('Name'),Start:start};  
-        let sittingBtn = $(sittingTemplate(model)); 
-        sittingBtn.css({
-            'text-align':'center','padding':'5px','margin-bottom':'2.5px',
-            'border':'1px solid ' + this.appVM.get('css-bg-color'), 
-            'background-color': this.appVM.get('css-color'),
-            'color': this.appVM.get('css-bg-color'),
-            'cursor':'pointer'
-        }); 
-        el.append(sittingBtn);
+        this.renderSelectedSitting(el); 
 
         // check if there are any available timeslots, if so display them, if not show message
         if(this.appVM.get('sitting').attributes.Timeslots.length > 0){
 
             $.each(this.appVM.get('sitting').attributes.Timeslots,(i,t)=> {
                 var time = momentTimezone.tz(t.Time,this.appVM.get('restaurant').TimeZoneIANA); 
-                var slot = $('<div class="timeslot-btn" id="'+ t.Time +'">'+ time.format("h:mm a") + '</div>'); 
+                var slot = $('<div class="timeslot-btn" id="'+ t.Time +'" >'+ time.format("h:mm a") + '</div>'); 
                 slot.css({
                     'text-align':'center','padding':'10px','margin-bottom':'2.5px',
                     'border':'1px solid ' + this.appVM.get('css-bg-color'), 
@@ -121,23 +102,99 @@ export class SittingCollectionView extends Backbone.View<any> {
         }
     }
 
+    renderInformationView(el:JQuery<HTMLElement>){
+        
+        this.renderSelectedSitting(el); 
+        var template = 
+        _.template(`<div class="update-timeslot" id="selected-timeslot-uat-<%=utc%>">
+                        <span style="display:inline-block;margin-right:5px;"><i class="material-icons">watch_later</i></span>
+                        <span style="display:inline-block;position:relative;bottom:7.5px;"><%=local %></span>                          
+                    </div>`);
+         let timeslotBtn = $(template(this.appVM.get('timeslot'))); 
+         timeslotBtn.css({
+            'padding':'7.5px','margin-bottom':'5px','font-weight':'bold',
+            'border':'1px solid ' + this.appVM.get('css-bg-color'), 
+            'background-color': this.appVM.get('css-color'),
+            'color': this.appVM.get('css-bg-color'),
+            'cursor':'pointer'
+        });
+        el.append(timeslotBtn);
+
+        let form = $(_.template(`<form>
+                                    <label for="forename">First name</label>
+                                    <input type="text" name="forename" id="forename" class="form-input"/>
+                                    <label for="surname">Last name</label>
+                                    <input type="text" name="surname" id="surname" class="form-input"/>
+                                    <label for="email">Email</label>
+                                    <input type="text" name="email" id="email" class="form-input"/>
+                                    <label for="email-confirmation">Email Confirmation</label>
+                                    <input type="text" name="email-confirmation" id="email-confirmation" class="form-input"/>
+                                    <label for="guests">Guests</label>
+                                    <select id="guests" name="guests" class="form-input"></select>
+                                    <label for="notes">Notes</label>
+                                    <textarea id="notes" name="notes" class="form-input"></textarea> 
+                                </form>`)());
+
+        for(let i=1;i<=this.appVM.get('restaurant').MaxGuests;i++){form.find('#guests').append('<option value="'+i+'">'+i+'</option>'); }
+
+        form.css({'background-color':this.appVM.get('css-bg-color'),'color':this.appVM.get('css-color'),'padding':'15px' }); 
+        form.find('.form-input').css({'color':'#000','min-width':'100%','max-width':'100%','min-height':'35px','margin-bottom':'5px','border-radius':'2.5px','padding':'2.5px','border':'1px solid ' + this.appVM.get('css-bg-color')}); 
+
+        let submit = $('<input type="button" value="Next" />');
+        submit.css({'min-width':'100%','padding':'5px','margin-bottom':'5px','border':'1px solid ' + this.appVM.get('css-color'),'color': this.appVM.get('css-color'),'background-color': this.appVM.get('css-bg-color')}); 
+
+        form.append(submit); 
+        el.append(form); 
+        
+    }
+
     events(){
         //bind the sitting btn clicked event to the sittingClicked function
         return <Backbone.EventsHash>{ 
             "click .sitting-btn": "sittingClicked",
-            "click .timeslot-sitting" : "displaySittings",
-            "click .timeslot-btn":"timeslotClicked" 
+            "click .update-sitting" : "displaySittings",
+            "click .timeslot-btn":"timeslotClicked" ,
+            "click .update-timeslot":"displayTimeslots"
         }; 
     }
 
     displaySittings(){
         this.appVM.set('sitting',null);
-        // change to the sittings view
         this.appVM.set('view','sittings');
-        // render the view again
         this.render(); 
-
     }
+
+    displayTimeslots(){
+        this.appVM.set('timeslot',null);
+        this.appVM.set('view','timeslots');
+        this.render(); 
+    }
+
+    renderSelectedSitting(el:JQuery<HTMLElement>){
+
+        var s = this.appVM.get('sitting');
+        var template = 
+        _.template(`<div class="update-sitting" id="sitting-id-<%=Id%>">
+                        <div>
+                            <span style="display:inline-block;margin-right:5px;"><i class="material-icons">calendar_today</i></span>
+                            <span style="display:inline-block;position:relative;bottom:7.5px;"><%= Name %> <%= Start %></span>
+                        </div> 
+                    </div>`);
+
+        var date = momentTimezone.tz(s.get('StartTimeUTC'),this.appVM.get('restaurant').TimeZoneIANA); 
+        let start =  date.format("ddd Do MMM @ h:mm a") ;    
+        var model = {Id:s.get('Id'), Name:s.get('Name'),Start:start,bgcolor:this.appVM.get('css-bg-color')};  
+        let sittingBtn = $(template(model)); 
+        sittingBtn.css({
+            'padding':'7.5px','margin-bottom':'5px','font-weight':'bold',
+            'border':'1px solid ' + this.appVM.get('css-bg-color'), 
+            'background-color': this.appVM.get('css-color'),
+            'color': this.appVM.get('css-bg-color'),
+            'cursor':'pointer'
+        }); 
+        el.append(sittingBtn);
+    }
+
     sittingClicked(e:JQuery.Event){
         // get the sitting id from the sitting button that was clicked
         let sittingId:number = parseInt($(e.currentTarget).attr('id').split('-')[2]); 
@@ -155,9 +212,10 @@ export class SittingCollectionView extends Backbone.View<any> {
         this.render(); 
     }
 
-    timeslotClicked(e:JQuery.Event){
-        
-        alert('really'); 
+    timeslotClicked(e:JQuery.Event){      
+        this.appVM.set('timeslot',{'utc':$(e.currentTarget).attr('id'),'local':$(e.currentTarget).html()}); 
+        this.appVM.set('view','information');
+        this.render(); 
     }
 
 }

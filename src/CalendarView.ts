@@ -42,7 +42,7 @@ export class CalendarView extends Backbone.View<any> {
 
     render(): Backbone.View<any> {
         
-        var monthSelect = $('<select id="t42-control-month-select" style="cursor:pointer" title="click to select month" ></select>');
+        var monthSelect = $('<select id="t42-control-month-select" style="cursor:pointer;margin-right:7.5px;border:#fff;" title="click to select month" ></select>');
         $.each(this.months,(i,m)=>{monthSelect.append('<option value="' + i + '">' + m + '</option>'); });
         monthSelect.val(this.appVM.get('month'));
         monthSelect.css({"background-color":  this.appVM.get('css-bg-color'),"color": this.appVM.get('css-color'),'border':'none'});

@@ -26,6 +26,8 @@ export class AppView extends Backbone.View<AppVM> {
 
     bootstrap(){
 
+        $('head').append('<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">');
+
         this.model  = new AppVM();
         _.extend(this.model,Backbone.Events);
 
@@ -44,7 +46,7 @@ export class AppView extends Backbone.View<AppVM> {
         let container:JQuery<HTMLElement> = 
         $(
             `<div id="t42-control-container">
-                <div id="t42-control-header" style="padding:25px;margin-bottom:5px;">
+                <div id="t42-control-header" style="padding:15px;margin-bottom:5px;">
                     <span id="t42-control-calendar"></span>
                     <span id="t42-control-pax"></span>
                 </div>
